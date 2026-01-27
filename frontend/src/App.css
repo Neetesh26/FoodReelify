@@ -1,0 +1,52 @@
+/* 🌍 Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+/* 📱 MOBILE FIRST (Default) */
+#root {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  color: #fff;
+}
+
+/* ❌ DESKTOP VIEW BLOCK */
+@media (min-width: 768px) {
+  body {
+    background: #020617;
+  }
+
+  #root {
+    display: none;
+  }
+
+  body::before {
+    content: "📱 This application is only available for mobile viewers";
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+    text-align: center;
+
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+
+    background: linear-gradient(180deg, #0f172a, #020617);
+  }
+}
