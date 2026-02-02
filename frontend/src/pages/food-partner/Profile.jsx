@@ -11,6 +11,7 @@ import {
 import { MdRestaurant } from "react-icons/md";
 import { GiMeal } from "react-icons/gi";
 import { BsCameraReels } from "react-icons/bs";
+import { axiosInstance } from "../../config/axiosInstance.jsx";
 
 const Profile = () => {
   const { id } = useParams();
@@ -20,8 +21,8 @@ const Profile = () => {
   const [videos, setVideos] = useState([]);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:3000/api/food-partner/${id}`, {
+    axiosInstance
+      .get(`/api/food-partner/${id}`, {
         withCredentials: true,
       })
       .then((response) => {

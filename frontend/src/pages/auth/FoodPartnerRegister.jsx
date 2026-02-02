@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import '../../styles/auth-shared.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { axiosInstance } from '../../config/axiosInstance.jsx';
 
 const FoodPartnerRegister = () => {
 
@@ -18,7 +19,7 @@ const FoodPartnerRegister = () => {
     const password = e.target.password.value;
     const address = e.target.address.value;
 
-    axios.post("http://localhost:3000/api/auth/food-partner/register", {
+    axiosInstance.post("/api/auth/food-partner/register", {
       name:businessName,
       contactName,
       phone,
