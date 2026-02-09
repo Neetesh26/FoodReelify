@@ -1,0 +1,370 @@
+================================================================================
+                    FOODREELIFY BACKEND DEPLOYMENT GUIDE
+                         Deploy to Render.com
+================================================================================
+
+TABLE OF CONTENTS:
+1. Prerequisites
+2. Prepare Backend for Deployment
+3. Create Render Account & Service
+4. Deploy Backend
+5. Configure Environment Variables
+6. Database Setup
+7. Post-Deployment Verification
+8. Troubleshooting
+
+================================================================================
+STEP 1: PREREQUISITES
+================================================================================
+
+✓ GitHub Account (to push your code)
+✓ Render Account (https://render.com)
+✓ MongoDB Atlas Account (for cloud database)
+✓ Redis Cloud Account (for caching)
+✓ ImageKit Account (for image hosting)
+✓ Git installed locally
+✓ Node.js installed locally
+
+================================================================================
+STEP 2: PREPARE BACKEND FOR DEPLOYMENT
+================================================================================
+
+2.1 Update package.json
+---
+• Ensure "start" script is: "start": "node server.js"
+• Verify main entry is: "main": "server.js"
+• Current scripts in your package.json are correct ✓
+
+2.2 Create .gitignore (if not exists)
+---
+Create file: backend/.gitignore
+Add content:
+    node_modules/
+    .env
+    .env.local
+    .DS_Store
+    *.log
+    dist/
+    build/
+
+2.3 Initialize Git Repository (if not done)
+---
+Command in backend folder:
+    git init
+    git add .
+    git commit -m "Initial commit - backend ready for deployment"
+
+2.4 Push to GitHub
+---
+Steps:
+    1. Create new repository on GitHub (e.g., foodreelify-backend)
+    2. Copy repository URL
+    3. Run in backend folder:
+        git remote add origin <your-github-repo-url>
+        git branch -M main
+        git push -u origin main
+
+================================================================================
+STEP 3: CREATE RENDER ACCOUNT & SERVICE
+================================================================================
+
+3.1 Create Render Account
+---
+• Visit: https://render.com
+• Sign up with GitHub account (recommended for easy deployment)
+• Complete profile setup
+
+3.2 Create New Web Service
+---
+From Render Dashboard:
+    1. Click "New +" button
+    2. Select "Web Service"
+    3. Click "Connect" next to your foodreelify-backend repository
+    4. Select the repository and authorize access
+    5. Choose "main" as the branch to deploy
+
+3.3 Service Configuration
+---
+Fill in the form with:
+    • Name: foodreelify-backend
+    • Runtime: Node
+    • Build Command: npm install
+    • Start Command: node server.js
+    • Instance Type: Free (for testing) or Starter+ (production)
+    • Plan: Choose based on your needs
+
+================================================================================
+STEP 4: DEPLOY BACKEND
+================================================================================
+
+4.1 Initial Deployment
+---
+• Click "Create Web Service"
+• Render will automatically:
+    ✓ Install dependencies (npm install)
+    ✓ Build the application
+    ✓ Start the server (node server.js)
+• Wait 2-5 minutes for deployment to complete
+• You'll receive a public URL like: https://foodreelify-backend.onrender.com
+
+4.2 Check Deployment Status
+---
+• In Render Dashboard, view "Events" tab
+• Check "Logs" for any errors during deployment
+• Service shows green dot when running ✓
+
+================================================================================
+STEP 5: CONFIGURE ENVIRONMENT VARIABLES
+================================================================================
+
+5.1 Set Environment Variables in Render
+---
+In your Render service dashboard:
+    1. Go to "Environment" tab
+    2. Click "Add Environment Variable"
+    3. Add each variable (see list below)
+
+5.2 Environment Variables Required
+---
+Variable Name              |  Value / Notes
+--------------------------------------------------
+PORT                      |  3000 (Render assigns automatically, but set for safety)
+JWT_SECRET                |  Generate strong secret (use: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+MONGODB_URI               |  Your MongoDB Atlas connection string
+REDIS_HOST                |  Your Redis Cloud host
+REDIS_PORT                |  Your Redis Cloud port
+REDIS_PASS                |  Your Redis Cloud password
+IMAGEKIT_PUBLIC_KEY       |  From ImageKit dashboard
+IMAGEKIT_PRIVATE_KEY      |  From ImageKit dashboard
+IMAGEKIT_URL_ENDPOINT     |  From ImageKit dashboard
+VITE                      |  Your frontend URL (https://your-frontend-domain.com)
+
+5.3 Example of Getting Connection Strings
+---
+
+MongoDB Atlas:
+    1. Go to https://www.mongodb.com/cloud/atlas
+    2. Create/select your cluster
+    3. Click "Connect"
+    4. Copy connection string
+    5. Replace <password> and <dbname> with actual values
+    Format: mongodb+srv://username:password@cluster.mongodb.net/dbname
+
+Redis Cloud:
+    1. Go to https://redis.com/try-free/
+    2. Create/select your database
+    3. Get host, port, and password from console
+    4. Format: REDIS_HOST=your-host, REDIS_PORT=19283, REDIS_PASS=your-pass
+
+5.4 Save Changes
+---
+• After adding all variables, the service will automatically redeploy
+• Watch "Events" tab to confirm successful redeployment
+
+================================================================================
+STEP 6: DATABASE SETUP
+================================================================================
+
+6.1 MongoDB Atlas Setup
+---
+Steps:
+    1. Go to https://www.mongodb.com/cloud/atlas
+    2. Create account or log in
+    3. Create a new cluster (free tier available)
+    4. Create database user with strong password
+    5. Whitelist IP addresses:
+        - Add "0.0.0.0/0" for Render (or specific Render IP)
+    6. Get connection string and add to MONGODB_URI variable
+
+6.2 Test MongoDB Connection
+---
+From Render Logs, you should see:
+    "Connected to MongoDB" or similar success message
+
+6.3 Redis Setup
+---
+Steps:
+    1. Go to https://redis.com/try-free/
+    2. Create account
+    3. Create a free database
+    4. Get host, port, password
+    5. Add to REDIS_HOST, REDIS_PORT, REDIS_PASS variables
+
+6.4 Test Redis Connection
+---
+From Render Logs, you should see:
+    "Connected to Redis cache"
+    "Redis cache is ready to use"
+
+================================================================================
+STEP 7: POST-DEPLOYMENT VERIFICATION
+================================================================================
+
+7.1 Check Service Status
+---
+• Visit your Render service URL
+• Expected response: Should start connecting to MongoDB and Redis
+• Check Logs in Render dashboard for any errors
+
+7.2 Test API Endpoints
+---
+Using Postman or curl:
+
+Test if server is running:
+    curl https://your-service-name.onrender.com/
+
+7.3 Verify Environment Variables
+---
+In Render Logs, you should see:
+    ✓ Server is running on port 3000
+    ✓ Connected to MongoDB
+    ✓ Connected to Redis cache
+    ✓ Redis cache is ready to use
+
+7.4 Test Database Connectivity
+---
+If you added any test routes, call them to verify:
+    • User authentication endpoints
+    • Food CRUD operations
+    • Caching operations
+
+================================================================================
+STEP 8: TROUBLESHOOTING
+================================================================================
+
+Issue: Build Failed
+---
+Solution:
+    1. Check Render "Events" tab for build errors
+    2. Verify package.json has all dependencies
+    3. Ensure .env variables are set correctly
+    4. Check that server.js is in backend root directory
+
+Issue: Service keeps restarting
+---
+Solution:
+    1. Check logs for runtime errors
+    2. Verify MongoDB connection string is correct
+    3. Ensure Redis credentials are valid
+    4. Check for missing environment variables
+
+Issue: Cannot connect to MongoDB
+---
+Solution:
+    1. Verify MongoDB URI format in MONGODB_URI variable
+    2. Check IP whitelist in MongoDB Atlas (should include 0.0.0.0/0)
+    3. Ensure username/password are correct
+    4. Test connection string locally first
+
+Issue: Cannot connect to Redis
+---
+Solution:
+    1. Verify REDIS_HOST, REDIS_PORT, REDIS_PASS are correct
+    2. Check Redis Cloud account is active
+    3. Verify database is running in Redis Cloud console
+    4. Check network connectivity
+
+Issue: Port already in use
+---
+Solution:
+    1. Render automatically assigns PORT, remove hardcoded port if set
+    2. Check server.js uses: const port = process.env.PORT || 3000
+
+Issue: CORS errors in frontend
+---
+Solution:
+    1. Set VITE variable to your frontend URL
+    2. Ensure CORS is configured in src/app.js:
+       cors({ origin: process.env.VITE, credentials: true })
+    3. Restart service after updating variables
+
+Issue: File not found or module errors
+---
+Solution:
+    1. Verify all require() paths are correct
+    2. Check that models, controllers, routes exist
+    3. Ensure .gitignore doesn't exclude important files
+    4. Run npm install locally to verify all dependencies install
+
+================================================================================
+STEP 9: FUTURE DEPLOYMENTS (After Initial Setup)
+================================================================================
+
+9.1 Automatic Deployments
+---
+Render automatically redeploys when you push to GitHub main branch:
+    1. Make changes locally
+    2. Commit: git add . && git commit -m "Your message"
+    3. Push: git push origin main
+    4. Render automatically detects change and redeploys
+    5. Watch "Events" tab on Render dashboard
+
+9.2 Manual Redeploy
+---
+In Render Dashboard:
+    1. Go to your service
+    2. Click "Manual Deploy" button
+    3. Select branch (main)
+    4. Wait for deployment
+
+9.3 View Live Logs
+---
+In Render Dashboard:
+    1. Click "Logs" tab
+    2. See real-time server output
+    3. Helpful for debugging issues
+
+================================================================================
+STEP 10: QUICK REFERENCE - ENVIRONMENT VARIABLES
+================================================================================
+
+Copy this template and fill in your actual values:
+
+PORT=3000
+JWT_SECRET=your-secret-key-here
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/FoodReelify
+VITE=https://your-frontend-domain.com
+REDIS_HOST=your-redis-host.cloud.redislabs.com
+REDIS_PORT=19283
+REDIS_PASS=your-redis-password
+IMAGEKIT_PUBLIC_KEY=public_xxxxx
+IMAGEKIT_PRIVATE_KEY=private_xxxxx
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your-endpoint
+
+================================================================================
+DEPLOYMENT CHECKLIST
+================================================================================
+
+Before Deployment:
+☐ All code committed to GitHub
+☐ No .env file in repository (in .gitignore)
+☐ package.json has correct scripts
+☐ server.js uses process.env.PORT
+
+During Deployment:
+☐ Render account created
+☐ GitHub repository connected to Render
+☐ Web Service created
+☐ All environment variables added
+
+After Deployment:
+☐ Service shows green/running status
+☐ Logs show successful connection messages
+☐ MongoDB connection confirmed in logs
+☐ Redis connection confirmed in logs
+☐ API endpoints respond correctly
+☐ Frontend can communicate with backend
+
+================================================================================
+SUPPORT RESOURCES
+================================================================================
+
+Render Documentation: https://render.com/docs
+MongoDB Atlas Docs: https://docs.mongodb.com/atlas/
+Redis Cloud Docs: https://redis.com/docs/cloud/
+Express.js Docs: https://expressjs.com/
+Node.js Docs: https://nodejs.org/docs/
+
+================================================================================
+                            END OF GUIDE
+================================================================================

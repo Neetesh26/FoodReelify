@@ -1,0 +1,619 @@
+================================================================================
+                    FOODREELIFY FRONTEND DEPLOYMENT GUIDE
+                    Deploy to Vercel / Netlify / Render
+================================================================================
+
+TABLE OF CONTENTS:
+1. Prerequisites
+2. Prepare Frontend for Deployment
+3. Update Backend URL
+4. Choose Deployment Platform
+5. Deploy to Vercel (Recommended for Vite+React)
+6. Deploy to Netlify (Alternative)
+7. Deploy to Render (Both Backend & Frontend)
+8. Post-Deployment Testing
+9. Troubleshooting
+
+================================================================================
+STEP 1: PREREQUISITES
+================================================================================
+
+✓ GitHub Account (to push your code)
+✓ Deployment Platform Account:
+   - Vercel (recommended): https://vercel.com
+   - Netlify (alternative): https://netlify.com
+   - Render (alternative): https://render.com
+✓ Git installed locally
+✓ Node.js installed locally
+✓ Backend deployed and running (with public URL)
+
+================================================================================
+STEP 2: PREPARE FRONTEND FOR DEPLOYMENT
+================================================================================
+
+2.1 Verify Build Scripts
+---
+Your package.json scripts are correct ✓
+    "dev": "vite"
+    "build": "vite build"
+    "preview": "vite preview"
+
+2.2 Update .gitignore (Verify It Exists)
+---
+File: frontend/.gitignore
+Should contain:
+    # Logs
+    logs
+    *.log
+    npm-debug.log*
+    
+    # Dependencies
+    node_modules
+    dist
+    .env
+    .env.local
+    .env.*.local
+    
+    # IDE
+    .vscode
+    .idea
+    *.swp
+    
+    # OS
+    .DS_Store
+    Thumbs.db
+
+2.3 Create .env.production (Optional but Recommended)
+---
+Create file: frontend/.env.production
+This will only be used during build for production values.
+
+Note: For now, you'll set environment variables in your deployment platform's settings.
+
+2.4 Initialize/Update Git Repository
+---
+In frontend folder:
+    git init
+    git add .
+    git commit -m "Frontend ready for deployment"
+
+2.5 Push to GitHub
+---
+Steps:
+    1. Create new repository on GitHub (e.g., foodreelify-frontend)
+    2. Or push to same repo under /frontend folder
+    3. Run:
+        git remote add origin <your-github-repo-url>
+        git branch -M main
+        git push -u origin main
+
+================================================================================
+STEP 3: UPDATE BACKEND URL
+================================================================================
+
+3.1 Update axiosInstance.jsx
+---
+File: frontend/src/config/axiosInstance.jsx
+
+CURRENT:
+    baseURL:"http://localhost:5000",
+
+CHANGE TO:
+    baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
+
+Note: Use VITE_API_URL for Vite projects (not REACT_APP_):
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+
+3.2 Create .env.local for Local Development
+---
+File: frontend/.env.local (DO NOT commit to git)
+    VITE_API_URL=http://localhost:5000
+
+3.3 Updated axiosInstance.jsx Should Look Like:
+---
+    import axios from "axios";
+
+    export const axiosInstance = axios.create({
+        baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+        timeout: 10000,
+        withCredentials: true
+    })
+
+3.4 Commit Changes
+---
+    git add frontend/src/config/axiosInstance.jsx
+    git commit -m "Update API URL to use environment variable"
+    git push origin main
+
+================================================================================
+STEP 4: CHOOSE DEPLOYMENT PLATFORM
+================================================================================
+
+Platform Comparison:
+
+VERCEL (RECOMMENDED FOR VITE+REACT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pros:
+  ✓ Optimized for Next.js, React, Vite
+  ✓ Automatic deployments on git push
+  ✓ Fast global CDN
+  ✓ Free tier very generous
+  ✓ Built-in environment variables management
+  ✓ Instant preview deployments
+
+Cons:
+  ✗ Less suitable for static sites
+  
+Best for: React/Vite apps
+
+Cost: Free tier available
+
+NETLIFY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pros:
+  ✓ Great for static sites
+  ✓ Simple deployment process
+  ✓ Form handling built-in
+  ✓ Serverless functions available
+  ✓ Free tier good enough
+
+Cons:
+  ✗ Slightly slower than Vercel
+  
+Best for: Static sites, React apps
+
+Cost: Free tier available
+
+RENDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pros:
+  ✓ Single platform for frontend & backend
+  ✓ Can deploy both together
+  ✓ Auto-deploys on git push
+  
+Cons:
+  ✗ Free tier limited
+  ✗ Slower than Vercel/Netlify
+  
+Best for: Projects where you want everything in one place
+
+Cost: Paid plans start at $7/month
+
+================================================================================
+STEP 5: DEPLOY TO VERCEL (RECOMMENDED)
+================================================================================
+
+5.1 Create Vercel Account
+---
+Steps:
+    1. Go to https://vercel.com
+    2. Click "Sign Up"
+    3. Choose "Continue with GitHub" (easiest)
+    4. Authorize Vercel to access your GitHub account
+
+5.2 Import Frontend Project
+---
+From Vercel Dashboard:
+    1. Click "Add New..." 
+    2. Select "Project"
+    3. Choose "Import Git Repository"
+    4. Search and select your "foodreelify-frontend" repository
+    5. Click "Import"
+
+5.3 Configure Project Settings
+---
+You'll see a configuration screen:
+
+Root Directory:
+    - If frontend is in subfolder: ./frontend
+    - If frontend is root: . (leave empty)
+
+Build and Output Settings:
+    Framework Preset: Vite (should auto-detect)
+    Build Command: npm run build
+    Output Directory: dist
+
+Environment Variables:
+    Add variable:
+        Name: VITE_API_URL
+        Value: https://your-backend-url.onrender.com
+        (Use the backend URL you got from Render)
+
+5.4 Deploy
+---
+    1. Click "Deploy"
+    2. Vercel will build and deploy automatically
+    3. Wait 2-3 minutes
+    4. You'll get a URL like: https://foodreelify-frontend.vercel.app
+
+5.5 Configure Domain (Optional)
+---
+    1. In Vercel project settings
+    2. Go to "Domains"
+    3. Add custom domain if you have one
+    4. Update DNS records as instructed
+
+5.6 Update Backend CORS
+---
+Important: Go back to your Render backend settings and update:
+
+Environment Variable VITE (or CORS_ORIGIN):
+    Old: http://localhost:5173
+    New: https://your-vercel-url.vercel.app
+
+Then restart the backend service on Render.
+
+================================================================================
+STEP 6: DEPLOY TO NETLIFY (ALTERNATIVE)
+================================================================================
+
+6.1 Create Netlify Account
+---
+Steps:
+    1. Go to https://netlify.com
+    2. Click "Sign up"
+    3. Choose "GitHub" (recommended)
+    4. Authorize Netlify
+
+6.2 Create New Site
+---
+From Netlify Dashboard:
+    1. Click "Add new site"
+    2. Select "Import an existing project"
+    3. Choose GitHub
+    4. Select your "foodreelify-frontend" repository
+
+6.3 Configure Build Settings
+---
+Branch to deploy: main
+
+Build settings:
+    Base directory: frontend/ (if applicable)
+    Build command: npm run build
+    Publish directory: dist
+
+6.4 Add Environment Variables
+---
+    1. Go to "Site settings"
+    2. Click "Build & Deploy"
+    3. Click "Environment"
+    4. Add new variable:
+        Key: VITE_API_URL
+        Value: https://your-backend-url.onrender.com
+
+6.5 Deploy
+---
+    1. Click "Deploy"
+    2. Netlify will build automatically
+    3. Wait 2-3 minutes
+    4. Get URL like: https://foodreelify.netlify.app
+
+6.6 Update Backend CORS
+---
+Go to Render backend and update:
+    VITE = https://foodreelify.netlify.app
+
+================================================================================
+STEP 7: DEPLOY TO RENDER (FOR BOTH FRONTEND & BACKEND)
+================================================================================
+
+7.1 Create Static Site on Render
+---
+From Render Dashboard:
+    1. Click "New +"
+    2. Select "Static Site"
+    3. Connect your GitHub repository
+    4. Select "foodreelify-frontend" or your repo
+
+7.2 Configure Settings
+---
+    Name: foodreelify-frontend
+    Build Command: npm run build
+    Publish directory: dist
+    Branch: main
+
+7.3 Add Environment Variables
+---
+    1. Go to "Environment"
+    2. Add:
+        VITE_API_URL=https://your-backend-service.onrender.com
+
+7.4 Deploy
+---
+    1. Click "Create Static Site"
+    2. Wait for build and deployment
+    3. Get URL like: https://foodreelify-frontend.onrender.com
+
+7.5 Link Frontend & Backend on Same Render Account
+---
+Both services now in one place, easier management!
+
+================================================================================
+STEP 8: POST-DEPLOYMENT TESTING
+================================================================================
+
+8.1 Access Your Frontend
+---
+    Visit: https://your-deployed-url.com
+    You should see your FoodReelify app loaded
+
+8.2 Test Authentication Flow
+---
+Steps:
+    1. Register as a new user
+    2. Log in
+    3. Check browser console for any errors
+    4. Verify network requests go to correct backend URL
+
+8.3 Test API Calls
+---
+In browser DevTools Network tab:
+    ✓ Check that requests go to your backend URL
+    ✓ Should see POST requests to /auth/register, /auth/login
+    ✓ Verify response status codes are 200/201 (success)
+    ✓ Should NOT see localhost:5000 requests
+
+8.4 Test Key Features
+---
+    ✓ User Registration
+    ✓ User Login
+    ✓ Food Partner Login
+    ✓ Browse reels/feed
+    ✓ Like/save functionality
+    ✓ Image uploads (using ImageKit)
+
+8.5 Test on Different Devices
+---
+    ✓ Desktop browser
+    ✓ Mobile browser
+    ✓ Tablet view
+    ✓ Different browsers (Chrome, Firefox, Safari)
+
+8.6 Check Console for Errors
+---
+Open DevTools Console (F12):
+    ✓ Should NOT see CORS errors
+    ✓ Should NOT see "Cannot find module" errors
+    ✓ Should NOT see failed API calls to localhost
+
+Common Error to Fix:
+    If you see: "Access to XMLHttpRequest from 'frontend-url' denied"
+    Solution: Update backend's CORS settings (Step 5.6 or 6.6)
+
+================================================================================
+STEP 9: TROUBLESHOOTING
+================================================================================
+
+Issue: Build Fails on Deployment Platform
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • Deployment shows "Build failed"
+    • Red error messages in build logs
+
+Solutions:
+    1. Check Build Logs for specific errors
+    2. Verify Node.js version compatibility
+    3. Ensure package.json has all dependencies
+    4. Run locally: npm install && npm run build
+    5. Check for missing files referenced in code
+
+Issue: Frontend Cannot Connect to Backend
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • API requests fail with status 0 or timeout
+    • Network tab shows failed requests
+    • Console shows "Cannot reach server"
+
+Solutions:
+    1. Verify VITE_API_URL environment variable is set correctly
+    2. Check that backend URL is publicly accessible
+    3. Verify backend is running and healthy
+    4. Check CORS settings in backend (allow your frontend domain)
+    5. Update backend environment variable VITE (your frontend URL)
+    6. Restart backend service after updating CORS
+
+Issue: CORS Error: "Access to XMLHttpRequest blocked"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • Console error: "CORS policy: No 'Access-Control-Allow-Origin' header"
+    • API calls return no data
+    • Status code shows 0 or ERR_
+
+Solution:
+    Backend needs to know your frontend URL:
+    1. Go to Render backend dashboard
+    2. Update environment variable:
+        VITE = https://your-frontend-deployed-url.com
+    3. Redeploy or restart backend service
+    4. Wait 1-2 minutes
+    5. Refresh frontend page
+
+Issue: Blank Page or 404 Error
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • Deployed URL shows blank page
+    • 404 error when visiting URL
+    • "Cannot find page"
+
+Solutions:
+    1. Check deployment platform shows "Success"
+    2. Verify build directory is correct (should be: dist)
+    3. Check vite.config.js is correct
+    4. Run locally: npm run build && npm run preview
+    5. Clear browser cache (Ctrl+Shift+Delete)
+    6. Check platform's build logs for errors
+
+Issue: Environment Variables Not Loading
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • API calls to localhost instead of deployed backend
+    • console.log(import.meta.env) shows undefined
+
+Solutions:
+    1. Environment variable must start with VITE_ (for Vite projects)
+    2. Variable name in code: import.meta.env.VITE_API_URL
+    3. In platform (Vercel/Netlify): VITE_API_URL=your-url
+    4. After setting variables, REBUILD the project
+    5. NOT just restart - must rebuild
+
+Issue: Images Not Loading from ImageKit
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • Food item images show as broken
+    • Image URLs in network tab show 404
+
+Solutions:
+    1. Check backend ImageKit credentials are set
+    2. Verify IMAGEKIT_URL_ENDPOINT is correct in backend
+    3. Check images are actually uploaded to ImageKit
+    4. Verify image URLs returned from backend are correct
+
+Issue: White Screen of Death
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • Page loads but shows nothing
+    • Console has JavaScript errors
+
+Solutions:
+    1. Open DevTools (F12) → Console tab
+    2. Read error messages carefully
+    3. Check for routing errors (AppRoutes.jsx)
+    4. Verify all imported components exist
+    5. Check for any hardcoded localhost URLs
+    6. Rebuild and redeploy
+
+Issue: Slow Performance
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Symptoms:
+    • Page loads slowly
+    • Images take long to display
+    • Network requests are slow
+
+Solutions:
+    1. If using Render: Upgrade to paid plan (free tier is slow)
+    2. Enable gzip compression in backend
+    3. Optimize images using ImageKit
+    4. Use Vercel instead (better performance)
+    5. Check network tab for slow requests
+    6. Enable lazy loading for images
+
+================================================================================
+STEP 10: FUTURE DEPLOYMENTS
+================================================================================
+
+10.1 Automatic Deployments
+---
+Once connected to GitHub, deployments happen automatically:
+    1. Make changes locally
+    2. Commit: git add . && git commit -m "message"
+    3. Push: git push origin main
+    4. Deployment platform auto-builds and deploys
+    5. New URL available in 2-3 minutes
+
+10.2 Manual Redeploy (if needed)
+---
+Vercel:
+    1. Go to project dashboard
+    2. Click "Deployments" tab
+    3. Click "..." on latest deployment
+    4. Select "Redeploy"
+
+Netlify:
+    1. Go to "Deploys" tab
+    2. Click "Trigger deploy"
+    3. Select branch to deploy
+
+Render:
+    1. Go to Static Site dashboard
+    2. Click "Manual Deploy"
+    3. Select branch
+
+10.3 Preview Deployments
+---
+Vercel creates preview URLs for each git branch/PR automatically.
+
+10.4 Check Logs
+---
+Vercel/Netlify/Render all have logs showing build output.
+Helpful for debugging deployment issues.
+
+================================================================================
+STEP 11: PRODUCTION CHECKLIST
+================================================================================
+
+Before Going Live:
+☐ Backend deployed and running
+☐ Frontend deployed and running
+☐ Both URLs updated (backend knows frontend URL, frontend knows backend URL)
+☐ Authentication works end-to-end
+☐ API calls successful to backend
+☐ Images loading correctly
+☐ Responsive design works on mobile
+☐ No console errors
+☐ No CORS errors
+☐ Database operations work
+☐ Caching (Redis) functional
+
+Monitoring:
+☐ Check deployment platform logs regularly
+☐ Test app weekly from different devices
+☐ Monitor backend error logs
+☐ Keep dependencies updated
+☐ Enable automatic security updates
+
+================================================================================
+STEP 12: ENVIRONMENT VARIABLES REFERENCE
+================================================================================
+
+Frontend (.env or platform settings):
+
+Variable              | Value
+════════════════════════════════════════════════════════════════════
+VITE_API_URL         | Your backend URL (from Render)
+                     | Example: https://foodreelify-backend.onrender.com
+
+Backend (already set in Render):
+
+Variable              | Value
+════════════════════════════════════════════════════════════════════
+VITE                 | Your frontend URL (from Vercel/Netlify/Render)
+                     | Example: https://foodreelify.vercel.app
+
+================================================================================
+QUICK REFERENCE - DEPLOYMENT URLS
+================================================================================
+
+After Deployment, Update These URLs:
+
+1. Backend URL (from Render):
+   https://your-backend-name.onrender.com
+   
+2. Frontend URL (from Vercel/Netlify/Render):
+   https://your-frontend-name.vercel.app  (or .netlify.app or .onrender.com)
+
+3. Update Backend's Environment Variable:
+   VITE = [Frontend URL from step 2]
+   → Restart/redeploy backend
+
+4. Verify Frontend's Environment Variable:
+   VITE_API_URL = [Backend URL from step 1]
+   → Already should be set, backend will use it
+
+5. Test All API Calls:
+   Open DevTools → Network tab
+   Should see requests to [Backend URL] not localhost
+
+================================================================================
+SUPPORT RESOURCES
+================================================================================
+
+Vercel Docs: https://vercel.com/docs
+Netlify Docs: https://docs.netlify.com/
+Render Docs: https://render.com/docs
+Vite Docs: https://vite.dev/
+React Router Docs: https://reactrouter.com/
+Axios Docs: https://axios-http.com/
+
+================================================================================
+                            END OF FRONTEND GUIDE
+================================================================================

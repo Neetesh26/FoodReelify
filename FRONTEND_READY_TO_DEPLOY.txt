@@ -1,0 +1,229 @@
+================================================================================
+                FOODREELIFY FRONTEND DEPLOYMENT SETUP
+                    Backend: https://foodreelify.onrender.com
+================================================================================
+
+✓ FRONTEND PREPARED FOR DEPLOYMENT
+
+Your frontend is now configured to connect to:
+    Backend URL: https://foodreelify.onrender.com
+
+================================================================================
+DEPLOYMENT OPTIONS (Choose One)
+================================================================================
+
+OPTION 1: VERCEL (RECOMMENDED - Fastest, Free)
+─────────────────────────────────────────────────────────────────────────────
+
+Step 1: Create Vercel Account
+    • Go to https://vercel.com
+    • Click "Sign Up"
+    • Sign in with GitHub
+
+Step 2: Deploy
+    • Click "Add New" → "Project"
+    • Select your "foodreelify-frontend" repo
+    • Framework: Vite (auto-detected)
+    • Build Command: npm run build
+    • Output Directory: dist
+    
+Step 3: Set Environment Variable
+    • In Vercel dashboard: "Environment Variables"
+    • Add: VITE_API_URL = https://foodreelify.onrender.com
+    • Click "Deploy"
+
+Step 4: Get Your Frontend URL
+    • Deployment completes in 2-3 minutes
+    • You'll get a URL like: https://foodreelify.vercel.app
+    • Copy this URL
+
+Step 5: Update Backend CORS
+    • Go to Render Dashboard
+    • Go to your foodreelify-backend service
+    • Settings → Environment
+    • Update: VITE = https://foodreelify.vercel.app
+    • Restart service
+
+Result: Frontend deployed and connected to backend! ✓
+
+─────────────────────────────────────────────────────────────────────────────
+
+OPTION 2: NETLIFY (Good Alternative)
+─────────────────────────────────────────────────────────────────────────────
+
+Step 1: Create Netlify Account
+    • Go to https://netlify.com
+    • Sign up with GitHub
+
+Step 2: Deploy
+    • Click "Add new site" → "Import an existing project"
+    • Select GitHub, choose your repo
+    • Build Command: npm run build
+    • Publish directory: dist
+
+Step 3: Set Environment Variable
+    • Site Settings → Build & Deploy → Environment
+    • Add: VITE_API_URL = https://foodreelify.onrender.com
+    • Trigger deploy
+
+Step 4: Get Your Frontend URL
+    • You'll get a URL like: https://foodreelify.netlify.app
+    • Copy this URL
+
+Step 5: Update Backend CORS
+    • Go to Render Dashboard → foodreelify-backend
+    • Settings → Environment
+    • Update: VITE = https://foodreelify.netlify.app
+    • Restart service
+
+Result: Frontend deployed and connected to backend! ✓
+
+─────────────────────────────────────────────────────────────────────────────
+
+OPTION 3: RENDER (Keep Everything Together)
+─────────────────────────────────────────────────────────────────────────────
+
+Step 1: In Render Dashboard
+    • Click "New +" → "Static Site"
+    • Connect your GitHub repo (frontend folder)
+
+Step 2: Configure
+    • Build Command: npm run build
+    • Publish directory: dist
+
+Step 3: Set Environment Variable
+    • Environment → Add:
+    • VITE_API_URL = https://foodreelify.onrender.com
+    • Deploy
+
+Step 4: Get Your Frontend URL
+    • You'll get a URL like: https://foodreelify-frontend.onrender.com
+    • Copy this URL
+
+Step 5: Update Backend CORS
+    • Same Render Dashboard → foodreelify-backend
+    • Settings → Environment
+    • Update: VITE = https://foodreelify-frontend.onrender.com
+    • Restart service
+
+Result: Frontend & backend both on Render! ✓
+
+================================================================================
+FILES PREPARED FOR DEPLOYMENT
+================================================================================
+
+✓ .env.production
+    └─ Contains: VITE_API_URL=https://foodreelify.onrender.com
+    └─ Used automatically during build/deployment
+
+✓ .env.local
+    └─ Contains: VITE_API_URL=http://localhost:5000
+    └─ Used for local development (npm run dev)
+    └─ NOT committed to git (in .gitignore)
+
+✓ src/config/axiosInstance.jsx
+    └─ Updated to use: import.meta.env.VITE_API_URL
+    └─ Falls back to localhost:5000 if not set
+    └─ Logs the API URL on startup (check browser console)
+
+✓ .gitignore
+    └─ Updated to exclude .env files
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Test Locally First (Optional but Recommended)
+   Command: npm run build && npm run preview
+   This simulates production build locally
+
+2. Push to GitHub
+   git add .
+   git commit -m "Configure for production deployment"
+   git push origin main
+
+3. Deploy Using One of the Options Above
+
+4. Test After Deployment
+   • Open your deployed frontend URL
+   • Open browser DevTools (F12) → Console
+   • Should see: "API Base URL: https://foodreelify.onrender.com"
+   • Try login/register to test API connection
+   • Check Network tab to verify requests go to backend
+
+5. If You See CORS Error
+   It means you skipped Step 5 above
+   Go back and update backend's VITE environment variable with your frontend URL
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+Backend URL (Use This):
+    https://foodreelify.onrender.com
+
+Your Frontend URL (After Deployment, Example):
+    https://foodreelify.vercel.app  (or .netlify.app or .onrender.com)
+
+Final Step (IMPORTANT):
+    Update Backend's VITE = Your Frontend URL
+    Then restart backend service
+
+================================================================================
+TIPS FOR SUCCESS
+================================================================================
+
+✓ Test locally before deploying:
+  npm run build && npm run preview
+
+✓ Check environment variables are set in deployment platform:
+  VITE_API_URL must be exactly: https://foodreelify.onrender.com
+
+✓ After setting env vars in platform, you MUST rebuild/redeploy:
+  Just clicking "restart" won't work, must rebuild the project
+
+✓ Common mistake:
+  Forgetting to update backend's VITE variable with frontend URL
+  This causes CORS errors
+
+✓ Monitor logs after deployment:
+  Check Vercel/Netlify/Render logs for any build or runtime errors
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Console shows "API Base URL: http://localhost:5000"
+→ Environment variable not set in deployment platform
+→ Add VITE_API_URL and rebuild
+
+Console shows CORS error
+→ Backend doesn't know your frontend URL
+→ Update backend's VITE variable and restart
+
+Network shows failed requests to backend
+→ Backend might be sleeping (Render free tier)
+→ Upgrade Render plan or use Vercel (free, better performance)
+
+Build fails on deployment platform
+→ Check platform logs for specific error
+→ Run npm run build locally to debug
+
+Image uploads fail
+→ Check backend's ImageKit credentials
+→ Image uploads use backend, not frontend
+
+================================================================================
+READY TO DEPLOY!
+================================================================================
+
+Your frontend is ready. Choose your deployment option above and follow steps.
+
+Once deployed, you'll have:
+✓ Frontend running on your chosen platform
+✓ Connected to backend: https://foodreelify.onrender.com
+✓ Full application live and accessible
+
+Good luck! 🚀
+
+================================================================================
